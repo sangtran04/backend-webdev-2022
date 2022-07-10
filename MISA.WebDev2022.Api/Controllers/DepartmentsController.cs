@@ -20,7 +20,7 @@ namespace MISA.WebDev2022.Api.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, type: typeof(List<Department>))]
         [SwaggerResponse(StatusCodes.Status400BadRequest)]
         [SwaggerResponse(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetAllPositions()
+        public IActionResult GetAllDepartments()
         {
             try
             {
@@ -34,8 +34,16 @@ namespace MISA.WebDev2022.Api.Controllers
                 // Thực hiện gọi vào DB để chạy câu lệnh truy vấn ở trên
                 var departments = mySqlConnection.Query<Department>(getAllDepartmentsCommand);
 
-                // Trả về dữ liệu cho client
-                return StatusCode(StatusCodes.Status200OK, departments);
+                // Xử lý dữ liệu trả về
+                if (departments != null)
+                {
+                    // Trả về dữ liệu cho client
+                    return StatusCode(StatusCodes.Status200OK, departments);
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, "e002");
+                }
             }
             catch (Exception exception)
             {

@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace MISA.WebDev2022.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class PositionsController : ControllerBase
     {
@@ -34,8 +34,16 @@ namespace MISA.WebDev2022.Api.Controllers
                 // Thực hiện gọi vào DB để chạy câu lệnh truy vấn ở trên
                 var positions = mySqlConnection.Query<Position>(getAllPositionsCommand);
 
-                // Trả về dữ liệu cho client
-                return StatusCode(StatusCodes.Status200OK, positions);
+                // Xử lý dữ liệu trả về
+                if (positions != null)
+                {
+                    // Trả về dữ liệu cho client
+                    return StatusCode(StatusCodes.Status200OK, positions);
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, "e002");
+                }
             }
             catch (Exception exception)
             {

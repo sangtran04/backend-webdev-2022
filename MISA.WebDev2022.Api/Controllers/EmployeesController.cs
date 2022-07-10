@@ -171,6 +171,7 @@ namespace MISA.WebDev2022.Api.Controllers
                 {
                     return StatusCode(StatusCodes.Status400BadRequest, "e003");
                 }
+
                 return StatusCode(StatusCodes.Status400BadRequest, "e001");
             }
             catch (Exception exception)
@@ -260,7 +261,7 @@ namespace MISA.WebDev2022.Api.Controllers
                 var parameters = new DynamicParameters();
                 parameters.Add("@$Skip", (pageNumber - 1) * pageSize);
                 parameters.Add("@$Take", pageSize);
-                parameters.Add("@$Sort", "EmployeeCode ASC");
+                parameters.Add("@$Sort", "ModifiedDate DESC");
 
                 var whereConditions = new List<string>();
                 if (code != null)
@@ -361,28 +362,35 @@ namespace MISA.WebDev2022.Api.Controllers
         /// <returns>Mã nhân viên mới tự động tăng</returns>
         /// Created by: TMSANG (09/06/2022)
         [HttpGet("new-code")]
-        [SwaggerResponse(StatusCodes.Status200OK, type: typeof(Employee))]
+        [SwaggerResponse(StatusCodes.Status200OK, type: typeof(string))]
         [SwaggerResponse(StatusCodes.Status400BadRequest)]
         [SwaggerResponse(StatusCodes.Status500InternalServerError)]
         public IActionResult GetNewEmployeeCode()
         {
-            // Khởi tạo kết nối tới DB MySQL
-            string connectionString = "Server=localhost;Port=3306;Database=test_webdev;Uid=root;Pwd=12345678@Abc;";
-            var mySqlConnection = new MySqlConnection(connectionString);
+            try
+            {
+                // Khởi tạo kết nối tới DB MySQL
+                string connectionString = "Server=localhost;Port=3306;Database=test_webdev;Uid=root;Pwd=12345678@Abc;";
+                var mySqlConnection = new MySqlConnection(connectionString);
 
-            // Chuẩn bị tên stored procedure
-            string storedProcedureName = "Proc_Employee_GetMaxCode";
+                // Chuẩn bị tên stored procedure
+                string storedProcedureName = "Proc_Employee_GetMaxCode";
 
-            // Thực hiện gọi vào DB để chạy stored procedure ở trên
-            string maxEmployeeCode = mySqlConnection.QueryFirstOrDefault<string>(storedProcedureName, commandType: System.Data.CommandType.StoredProcedure);
+                // Thực hiện gọi vào DB để chạy stored procedure ở trên
+                string maxEmployeeCode = mySqlConnection.QueryFirstOrDefault<string>(storedProcedureName, commandType: System.Data.CommandType.StoredProcedure);
 
-            // Xử lý sinh mã nhân viên mới tự động tăng
-            // Cắt chuỗi mã nhân viên lớn nhất trong hệ thống để lấy phần số
-            // Mã nhân viên mới = "NV" + Giá trị cắt chuỗi ở  trên + 1
-            string newEmployeeCode = "NV" + (Int64.Parse(maxEmployeeCode.Substring(2)) + 1).ToString();
+                // Xử lý sinh mã nhân viên mới tự động tăng
+                // Cắt chuỗi mã nhân viên lớn nhất trong hệ thống để lấy phần số
+                // Mã nhân viên mới = "NV" + Giá trị cắt chuỗi ở  trên + 1
+                string newEmployeeCode = "NV" + (Int64.Parse(maxEmployeeCode.Substring(2)) + 1).ToString();
 
-            // Trả về dữ liệu cho client
-            return StatusCode(StatusCodes.Status200OK, newEmployeeCode);
+                // Trả về dữ liệu cho client
+                return StatusCode(StatusCodes.Status200OK, newEmployeeCode);
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, "e001");
+            }
         }
     }
 }
